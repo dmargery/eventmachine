@@ -196,14 +196,14 @@ SslContext_t::SslContext_t (bool is_server, const std::string &privkeyfile, cons
 		// The SSL_CTX calls here do NOT allocate memory.
 		int e;
 		if (privkeyfile.length() > 0)
-			e = SSL_CTX_use_PrivateKey_file (pCtx, privkeyfile.c_str(), SSL_FILETYPE_PEM);
+			e = SSL_CTX_use_PrivateKey_file (pCtx, const_cast<char *>(privkeyfile.c_str()), SSL_FILETYPE_PEM);
 		else
 			e = SSL_CTX_use_PrivateKey (pCtx, DefaultPrivateKey);
 		if (e <= 0) ERR_print_errors_fp(stderr);
 		assert (e > 0);
 
 		if (certchainfile.length() > 0)
-			e = SSL_CTX_use_certificate_chain_file (pCtx, certchainfile.c_str());
+			e = SSL_CTX_use_certificate_chain_file (pCtx, const_cast<char *>(certchainfile.c_str()));
 		else
 			e = SSL_CTX_use_certificate (pCtx, DefaultCertificate);
 		if (e <= 0) ERR_print_errors_fp(stderr);
@@ -213,7 +213,7 @@ SslContext_t::SslContext_t (bool is_server, const std::string &privkeyfile, cons
 			DH   *dh;
 			BIO  *bio;
 
-			bio = BIO_new_file(dhparam.c_str(), "r");
+			bio = BIO_new_file(const_cast<char *>(dhparam.c_str()), "r");
 			if (bio == NULL) {
 				char buf [500];
 				snprintf (buf, sizeof(buf)-1, "dhparam: BIO_new_file(%s) failed", dhparam.c_str());
@@ -280,12 +280,12 @@ SslContext_t::SslContext_t (bool is_server, const std::string &privkeyfile, cons
 		// To change a certificate, private key pair the new certificate needs to be set with
 		// SSL_use_certificate() or SSL_CTX_use_certificate() before setting the private key with SSL_CTX_use_PrivateKey() or SSL_use_PrivateKey().
 		if (certchainfile.length() > 0) {
-			e = SSL_CTX_use_certificate_chain_file (pCtx, certchainfile.c_str());
+			e = SSL_CTX_use_certificate_chain_file (pCtx, const_cast<char *>(certchainfile.c_str()));
 			if (e <= 0) ERR_print_errors_fp(stderr);
 			assert (e > 0);
 		}
 		if (cert.length() > 0) {
-			BIO *bio = BIO_new_mem_buf (cert.c_str(), -1);
+			BIO *bio = BIO_new_mem_buf (const_cast<char *>(cert.c_str()), -1);
 			BIO_set_mem_eof_return(bio, 0);
 			X509 * clientCertificate = PEM_read_bio_X509 (bio, NULL, NULL, 0);
 			e = SSL_CTX_use_certificate (pCtx, clientCertificate);
@@ -298,7 +298,7 @@ SslContext_t::SslContext_t (bool is_server, const std::string &privkeyfile, cons
 			if (privkeypass.length() > 0) {
 				SSL_CTX_set_default_passwd_cb_userdata(pCtx, const_cast<char*>(privkeypass.c_str()));
 			}
-			e = SSL_CTX_use_PrivateKey_file (pCtx, privkeyfile.c_str(), SSL_FILETYPE_PEM);
+			e = SSL_CTX_use_PrivateKey_file (pCtx, const_cast<char*>(privkeyfile.c_str()), SSL_FILETYPE_PEM);
 			if (e <= 0) ERR_print_errors_fp(stderr);
 			assert (e > 0);
 		}
