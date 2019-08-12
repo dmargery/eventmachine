@@ -303,7 +303,7 @@ SslContext_t::SslContext_t (bool is_server, const std::string &privkeyfile, cons
 			assert (e > 0);
 		}
 		if (privkey.length() > 0) {
-			BIO *bio = BIO_new_mem_buf (privkey.c_str(), -1);
+			BIO *bio = BIO_new_mem_buf (const_cast<char*>privkey.c_str(), -1);
 			BIO_set_mem_eof_return(bio, 0);
 			EVP_PKEY * clientPrivateKey = PEM_read_bio_PrivateKey (bio, NULL, NULL, const_cast<char*>(privkeypass.c_str()));
 			e = SSL_CTX_use_PrivateKey (pCtx, clientPrivateKey);
